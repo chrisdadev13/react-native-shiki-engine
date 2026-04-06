@@ -1,0 +1,45 @@
+examples/shared/components/TokenDisplay.tsx
+  b0bc281316c8a9ca 2-3,14-16,19-26,34-36
+examples/react-native/src/components/ShikiExampleScreen.tsx
+  b0bc281316c8a9ca 3,88-101,111-128
+examples/shared/components/CustomCodeBlockHeader.tsx
+  b0bc281316c8a9ca 1-51
+examples/expo-app/src/components/ShikiExampleScreen.web.tsx
+  b0bc281316c8a9ca 3,84-97,108-124
+examples/shared/components/CustomDiffFileHeader.tsx
+  b0bc281316c8a9ca 1-65
+examples/expo-app/src/components/ShikiExampleScreen.tsx
+  b0bc281316c8a9ca 3,92-105,116-132
+packages/react-native-shiki-diff-ui/src/components/MultiFileDiff.tsx
+  b0bc281316c8a9ca 3,6,15-17,26-28,58-60
+packages/react-native-shiki-diff-ui/src/components/CodeBlockWithGutter.tsx
+  b0bc281316c8a9ca 3,8-14,25-33,41-67,75-77,81-99,103,108
+packages/react-native-shiki-diff-ui/src/styles.ts
+  b0bc281316c8a9ca 240-243,245
+packages/react-native-shiki-diff-ui/src/index.ts
+  b0bc281316c8a9ca 2,4
+packages/react-native-shiki-diff-ui/src/components/FileDiffSection.tsx
+  b0bc281316c8a9ca 3,18-24,33-42,82-118,139-142,150-152,164-180,195,201-203
+examples/shared/components/index.ts
+  b0bc281316c8a9ca 1-2,4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.5",
+  "base_commit_sha": "80564154922d9477a3b363a27aee62f61e9a2b53",
+  "prompts": {
+    "b0bc281316c8a9ca": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "dab8db12-99ad-4807-b00b-20f1a653e3f9",
+        "model": "composer-2"
+      },
+      "human_author": "Chris",
+      "messages": [],
+      "total_additions": 412,
+      "total_deletions": 71,
+      "accepted_lines": 403,
+      "overriden_lines": 0
+    }
+  }
+}
