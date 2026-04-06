@@ -9,7 +9,7 @@ Oniguruma regex engine implementation for React Native, providing high-performan
 
 - **High-performance** native regex engine using Oniguruma, optimized for syntax highlighting
 - **Fully synchronous** pattern matching with no async/await, no Promises, no Bridge
-- Uses [**JSI**](https://reactnative.dev/docs/the-new-architecture/landing-page#fast-javascriptnative-interfacing) and [**C++ TurboModules**](https://github.com/reactwg/react-native-new-architecture/blob/main/docs/turbo-modules-xplat.md) for direct JavaScript-to-native communication
+- Uses **[JSI](https://reactnative.dev/docs/the-new-architecture/landing-page#fast-javascriptnative-interfacing)** and **[C++ TurboModules](https://github.com/reactwg/react-native-new-architecture/blob/main/docs/turbo-modules-xplat.md)** for direct JavaScript-to-native communication
 - **Smart pattern caching** system for optimal performance
 - **Memory efficient** with automatic cleanup of unused patterns
 - **Full compatibility** with Shiki's regex engine requirements
@@ -71,16 +71,19 @@ const tokens = highlighter.codeToTokensBase(code, {
 ```
 
 > [!IMPORTANT]
+>
 > ### Performance Note: The Highlighter Instance
 >
 > Create and maintain a single Highlighter instance at the app level. Avoid instantiating new highlighters inside components or frequently called functions.
 >
 > #### Recommended:
+>
 > - Store the highlighter instance in a global singleton or context
 > - Initialize it during app startup
 > - Reuse the same instance across your entire React Native application
 >
 > #### Not Recommended:
+>
 > - Creating new instances inside component render methods
 > - Initializing highlighters inside useEffect or event handlers
 > - Multiple instances for the same language/theme combination
@@ -105,13 +108,15 @@ For Expo apps targeting web, this native engine is not compatible as it relies o
 ### Setup for Expo Web
 
 1. Install the WASM engine:
+
 ```sh
 npx expo install @shikijs/engine-oniguruma
 ```
 
-2. Create platform-specific context files:
+1. Create platform-specific context files:
 
 **Native platforms** (`contexts/highlighter/index.tsx`):
+
 ```tsx
 import { createHighlighterCore } from '@shikijs/core'
 import javascript from '@shikijs/langs/javascript'
@@ -126,6 +131,7 @@ const highlighter = await createHighlighterCore({
 ```
 
 **Web platform** (`contexts/highlighter/index.web.tsx`):
+
 ```tsx
 import { createHighlighterCore } from '@shikijs/core'
 import { createOnigurumaEngine } from '@shikijs/engine-oniguruma'
@@ -150,42 +156,34 @@ See the [expo-app example](https://github.com/skiniks/react-native-shiki-engine/
 The module uses a three-layer architecture optimizing for both performance and developer experience:
 
 1. **JavaScript Layer** (`src/`)
-
-   - TypeScript interfaces and JS wrapper for type safety
-   - Efficient pattern lifecycle management with automatic cleanup
-   - Seamless integration with Shiki's API
-   - Error boundaries with graceful degradation
-
+  - TypeScript interfaces and JS wrapper for type safety
+  - Efficient pattern lifecycle management with automatic cleanup
+  - Seamless integration with Shiki's API
+  - Error boundaries with graceful degradation
 2. **JSI Bridge** (`cpp/`)
-
-   - Zero-copy JavaScript-to-native communication
-   - Smart pointer-based memory management
-   - Thread-safe pattern caching with LRU eviction
-   - Host object lifetime tracking
-
+  - Zero-copy JavaScript-to-native communication
+  - Smart pointer-based memory management
+  - Thread-safe pattern caching with LRU eviction
+  - Host object lifetime tracking
 3. **Oniguruma Core** (vendored)
-   - High-performance native regex engine
-   - Optimized pattern matching with capture groups
-   - Full Unicode support with UTF-8/16 encoding
-   - Non-backtracking algorithm for predictable performance
+  - High-performance native regex engine
+  - Optimized pattern matching with capture groups
+  - Full Unicode support with UTF-8/16 encoding
+  - Non-backtracking algorithm for predictable performance
 
 ### Pattern Caching
 
 The engine implements a sophisticated multi-level caching system:
 
 - **L1 Cache**: Hot patterns in JSI host objects
-
   - Zero-copy access from JavaScript
   - Reference-counted lifetime management
   - Automatic cleanup on context destruction
-
 - **L2 Cache**: Compiled patterns in native memory
-
   - LRU eviction with generational collection
   - Adaptive sizing based on memory pressure
   - Thread-safe concurrent access
   - Configurable eviction policies
-
 - **Memory Management**
   - Proactive cleanup of unused patterns
   - Automatic defragmentation
@@ -194,15 +192,17 @@ The engine implements a sophisticated multi-level caching system:
 
 ## Supported Platforms
 
-|   Platform    | Architecture |             Description              | Status |
-| :-----------: | :----------: | :----------------------------------: | :----: |
-| iOS Simulator |    x86_64    |        Intel-based simulators        |   ✅   |
-| iOS Simulator |    arm64     |       Apple Silicon simulators       |   ✅   |
-|  iOS Device   |    arm64     |        All modern iOS devices        |   ✅   |
-|    Android    |  arm64-v8a   | Modern Android devices (64-bit ARM)  |   ✅   |
-|    Android    | armeabi-v7a  |  Older Android devices (32-bit ARM)  |   ✅   |
-|    Android    |     x86      | Android emulators (32-bit Intel/AMD) |   ✅   |
-|    Android    |    x86_64    | Android emulators (64-bit Intel/AMD) |   ✅   |
+
+| Platform      | Architecture | Description                          | Status |
+| ------------- | ------------ | ------------------------------------ | ------ |
+| iOS Simulator | x86_64       | Intel-based simulators               | ✅      |
+| iOS Simulator | arm64        | Apple Silicon simulators             | ✅      |
+| iOS Device    | arm64        | All modern iOS devices               | ✅      |
+| Android       | arm64-v8a    | Modern Android devices (64-bit ARM)  | ✅      |
+| Android       | armeabi-v7a  | Older Android devices (32-bit ARM)   | ✅      |
+| Android       | x86          | Android emulators (32-bit Intel/AMD) | ✅      |
+| Android       | x86_64       | Android emulators (64-bit Intel/AMD) | ✅      |
+
 
 ## Contributing
 
@@ -229,3 +229,4 @@ For questions, bug reports, or feature requests:
 
 - [GitHub Issues](https://github.com/skiniks/react-native-shiki-engine/issues)
 - [GitHub Discussions](https://github.com/skiniks/react-native-shiki-engine/discussions)
+

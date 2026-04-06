@@ -1,3 +1,5 @@
+export * from './CustomCodeBlockHeader'
+export * from './CustomDiffFileHeader'
 export * from './TokenDisplay'
-export type { FileContents, FileDiffPair, MultiFileDiffProps } from 'react-native-shiki-diff-ui'
+export type { CodeBlockHeaderRenderProps, FileContents, FileDiffHeaderRenderProps, FileDiffPair, MultiFileDiffProps } from 'react-native-shiki-diff-ui'
 export { MultiFileDiff } from 'react-native-shiki-diff-ui'

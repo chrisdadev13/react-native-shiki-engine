@@ -1,8 +1,9 @@
 import type { ThemedToken } from '@shikijs/core'
 import type { FileDiffPair } from '../types'
-import React, { Fragment, useMemo } from 'react'
+import React, { Fragment, useMemo, type ComponentType, type ReactNode } from 'react'
 import { buildLineDiffRows } from '../buildLineDiffRows'
 import { langFromFileName } from '../langFromFileName'
+import type { FileDiffHeaderRenderProps } from './FileDiffSection'
 import { FileDiffSection } from './FileDiffSection'
 
 export interface MultiFileDiffProps {
@@ -11,6 +12,9 @@ export interface MultiFileDiffProps {
   theme: string
   defaultLang?: string
   contextCollapseThreshold?: number
+  showFileHeader?: boolean
+  renderFileHeader?: (props: FileDiffHeaderRenderProps) => ReactNode
+  fileHeaderComponent?: ComponentType<FileDiffHeaderRenderProps>
 }
 
 export function MultiFileDiff({
@@ -19,6 +23,9 @@ export function MultiFileDiff({
   theme,
   defaultLang = 'typescript',
   contextCollapseThreshold,
+  showFileHeader,
+  renderFileHeader,
+  fileHeaderComponent,
 }: MultiFileDiffProps) {
   const sections = useMemo(() => {
     return files.map((pair) => {
@@ -48,6 +55,9 @@ export function MultiFileDiff({
           oldTokens={section.oldTokens}
           newTokens={section.newTokens}
           contextCollapseThreshold={contextCollapseThreshold}
+          showFileHeader={showFileHeader}
+          renderFileHeader={renderFileHeader}
+          fileHeaderComponent={fileHeaderComponent}
         />
       ))}
     </Fragment>

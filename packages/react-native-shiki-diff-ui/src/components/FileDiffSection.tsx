@@ -1,6 +1,6 @@
 import type { ThemedToken } from '@shikijs/core'
 import type { DiffRow } from '../types'
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState, type ComponentType, type ReactNode } from 'react'
 import { Platform, Pressable, ScrollView, Text, View } from 'react-native'
 import { buildDiffDisplayItems, collapseKeyForBaseIndex } from '../buildDiffDisplayItems'
 import {
@@ -15,6 +15,13 @@ import {
 import { diffUiStyles } from '../styles'
 import { TokenLine } from './TokenLine'
 
+export interface FileDiffHeaderRenderProps {
+  oldFileName: string
+  newFileName: string
+  fileRenamed: boolean
+  stats: { add: number, remove: number }
+}
+
 export interface FileDiffSectionProps {
   oldFileName: string
   newFileName: string
@@ -23,6 +30,16 @@ export interface FileDiffSectionProps {
   newTokens: ThemedToken[][]
   /** Consecutive context lines at or above this count collapse into a summary bar. */
   contextCollapseThreshold?: number
+  /** When false, no file header is rendered and the diff panel gets rounded top corners. */
+  showFileHeader?: boolean
+  /**
+   * Replaces the built-in header. Return null to render nothing (same as hiding the header
+   * for layout); prefer `showFileHeader={false}` when you never want a header.
+   * Takes precedence over `fileHeaderComponent` when both are set.
+   */
+  renderFileHeader?: (props: FileDiffHeaderRenderProps) => ReactNode
+  /** Custom header component. Used when `renderFileHeader` is omitted. */
+  fileHeaderComponent?: ComponentType<FileDiffHeaderRenderProps>
 }
 
 const DEFAULT_CONTEXT_COLLAPSE = 6
@@ -62,6 +79,43 @@ function CollapsedBarChevrons({ placement }: { placement: CollapseBarPlacement }
   )
 }
 
+function DefaultFileDiffHeader({
+  oldFileName,
+  newFileName,
+  fileRenamed,
+  stats,
+}: FileDiffHeaderRenderProps) {
+  return (
+    <View style={diffUiStyles.fileHeader}>
+      <View style={diffUiStyles.fileHeaderRow}>
+        <View style={diffUiStyles.breadcrumbRow}>
+          {fileRenamed
+            ? (
+                <>
+                  <Text style={diffUiStyles.breadcrumbName} numberOfLines={1}>
+                    {oldFileName}
+                  </Text>
+                  <Text style={diffUiStyles.breadcrumbArrow}>→</Text>
+                  <Text style={diffUiStyles.breadcrumbNameEmphasis} numberOfLines={1}>
+                    {newFileName}
+                  </Text>
+                </>
+              )
+            : (
+                <Text style={diffUiStyles.breadcrumbNameEmphasis} numberOfLines={1}>
+                  {newFileName}
+                </Text>
+              )}
+        </View>
+        <View style={diffUiStyles.diffStatsRow}>
+          <Text style={diffUiStyles.diffStatRemove}>{`-${stats.remove}`}</Text>
+          <Text style={diffUiStyles.diffStatAdd}>{`+${stats.add}`}</Text>
+        </View>
+      </View>
+    </View>
+  )
+}
+
 function renderAccentStripe(kind: DiffRow['kind']) {
   const color = accentStripeColorForKind(kind)
   const dashed = Platform.OS === 'ios'
@@ -82,6 +136,10 @@ function renderAccentStripe(kind: DiffRow['kind']) {
   return <View style={diffUiStyles.accentStripe} />
 }
 
+function isRenderableHeader(node: ReactNode): boolean {
+  return node !== null && node !== undefined && node !== false
+}
+
 export function FileDiffSection({
   oldFileName,
   newFileName,
@@ -89,6 +147,9 @@ export function FileDiffSection({
   oldTokens,
   newTokens,
   contextCollapseThreshold = DEFAULT_CONTEXT_COLLAPSE,
+  showFileHeader = true,
+  renderFileHeader,
+  fileHeaderComponent: FileHeaderComponent,
 }: FileDiffSectionProps) {
   const [expandedCollapses, setExpandedCollapses] = useState(() => new Set<string>())
 
@@ -99,6 +160,23 @@ export function FileDiffSection({
 
   const stats = useMemo(() => countDiffStats(rows), [rows])
   const fileRenamed = oldFileName !== newFileName
+
+  const headerRenderProps: FileDiffHeaderRenderProps = useMemo(
+    () => ({ oldFileName, newFileName, fileRenamed, stats }),
+    [oldFileName, newFileName, fileRenamed, stats],
+  )
+
+  const headerNode: ReactNode = useMemo(() => {
+    if (!showFileHeader)
+      return null
+    if (renderFileHeader !== undefined)
+      return renderFileHeader(headerRenderProps)
+    if (FileHeaderComponent !== undefined)
+      return <FileHeaderComponent {...headerRenderProps} />
+    return <DefaultFileDiffHeader {...headerRenderProps} />
+  }, [showFileHeader, renderFileHeader, FileHeaderComponent, headerRenderProps])
+
+  const hasHeader = isRenderableHeader(headerNode)
 
   const toggleCollapse = (baseIndex: number) => {
     const key = collapseKeyForBaseIndex(baseIndex)
@@ -114,38 +192,15 @@ export function FileDiffSection({
 
   return (
     <View style={diffUiStyles.fileSection}>
-      <View style={diffUiStyles.fileHeader}>
-        <View style={diffUiStyles.fileHeaderRow}>
-          <View style={diffUiStyles.breadcrumbRow}>
-            {fileRenamed
-              ? (
-                  <>
-                    <Text style={diffUiStyles.breadcrumbName} numberOfLines={1}>
-                      {oldFileName}
-                    </Text>
-                    <Text style={diffUiStyles.breadcrumbArrow}>→</Text>
-                    <Text style={diffUiStyles.breadcrumbNameEmphasis} numberOfLines={1}>
-                      {newFileName}
-                    </Text>
-                  </>
-                )
-              : (
-                  <Text style={diffUiStyles.breadcrumbNameEmphasis} numberOfLines={1}>
-                    {newFileName}
-                  </Text>
-                )}
-          </View>
-          <View style={diffUiStyles.diffStatsRow}>
-            <Text style={diffUiStyles.diffStatRemove}>{`-${stats.remove}`}</Text>
-            <Text style={diffUiStyles.diffStatAdd}>{`+${stats.add}`}</Text>
-          </View>
-        </View>
-      </View>
+      {hasHeader ? headerNode : null}
       <View
         style={[
           diffUiStyles.panel,
           diffUiStyles.diffPanelBody,
           diffUiStyles.diffPanelBodyPadding,
+          !hasHeader
+            ? { borderTopLeftRadius: 12, borderTopRightRadius: 12 }
+            : null,
         ]}
       >
         <View style={diffUiStyles.diffBodyRow}>

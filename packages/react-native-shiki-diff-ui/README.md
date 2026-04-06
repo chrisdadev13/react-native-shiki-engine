@@ -6,7 +6,7 @@ This package renders **syntax-highlighted, line-based file diffs** in React Nati
 
 The main entry point is `**MultiFileDiff`**. You pass:
 
-- `**files**` — one or more old/new file pairs (paths + full source strings).
+- `**files`** — one or more old/new file pairs (paths + full source strings).
 - `**tokenize**` — a function with the same shape as Shiki’s line tokenizer: `(code, { lang, theme }) => ThemedToken[][]`.
 - `**theme**` — Shiki theme id (must match what your highlighter loaded).
 
@@ -46,10 +46,10 @@ Per file you may set `**lang**` on the pair to force the Shiki language; otherwi
 ## How it works
 
 1. **Line splitting** — Both versions are split with the same rule as Shiki line tokens: `code.split(/\r?\n/)` (`splitSourceLines`). That keeps diff rows and token rows aligned.
-2. **Line diff** — `buildLineDiffRows` uses the `**diff`** package’s `diffArrays` on the two line arrays. That produces a list of `**DiffRow**` objects:
+2. **Line diff** — `buildLineDiffRows` uses the `**diff`** package’s `diffArrays` on the two line arrays. That produces a list of `**DiffRow`** objects:
   - `**context**` — line unchanged on both sides (one row; uses the **new** side’s line index for tokens).
   - `**remove`** — line only on the old side (`source: 'old'`, old line number set).
-  - `**add**` — line only on the new side (`source: 'new'`, new line number set).
+  - `**add`** — line only on the new side (`source: 'new'`, new line number set).
    This is a **line-oriented** diff (not intra-line/word granularity).
 3. **Highlighting** — For each file pair, `MultiFileDiff` calls your `**tokenize`** separately on **old** and **new** full sources with the chosen `lang` and `theme`. Each `DiffRow` then takes tokens from either `oldTokens[lineIndex]` or `newTokens[lineIndex]` depending on `row.source` (`lineTokensForRow`).
 4. **Rendering** — `FileDiffSection` draws a **single-column unified-style** view: gutter (line number + `+`/`-`/space), optional accent stripe, and a horizontally scrollable code column using the same `**TokenLine`** styling approach as the rest of this UI kit.
@@ -59,7 +59,7 @@ Per file you may set `**lang**` on the pair to force the Shiki language; otherwi
 
 If you already have tokens and diff rows (e.g. custom diff or caching), you can render one file with `**FileDiffSection`** directly: pass `oldFileName`, `newFileName`, `rows`, `oldTokens`, `newTokens`, and optional `contextCollapseThreshold`.
 
-You can also call `**buildLineDiffRows(oldText, newText)**` yourself to reuse the same diff logic outside this UI.
+You can also call `**buildLineDiffRows(oldText, newText)`** yourself to reuse the same diff logic outside this UI.
 
 ## Peer dependencies
 

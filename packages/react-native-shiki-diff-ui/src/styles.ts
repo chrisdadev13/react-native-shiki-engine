@@ -135,10 +135,10 @@ export const diffUiStyles = StyleSheet.create({
     flexShrink: 0,
   },
   signText: {
-    fontSize: 13,
+    fontSize: 12,
     lineHeight: 20,
     fontFamily: monospaceFamily,
-    fontWeight: "700",
+    fontWeight: "400",
   },
   codeScrollInner: {
     flexDirection: "row",
@@ -237,8 +237,12 @@ export const diffUiStyles = StyleSheet.create({
     marginRight: 8,
     minWidth: 0,
   },
+  /** Vertical inset for CodeBlockWithGutter panel body (both plain and line-number layouts). */
+  codeBlockPanelPadding: {
+    paddingVertical: 6,
+  },
   codeBlockPlainScrollContent: {
-    paddingVertical: 8,
+    paddingVertical: 6,
     paddingLeft: 8,
     paddingRight: 10,
   },

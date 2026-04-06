@@ -1,6 +1,6 @@
 import type { FileDiffPair } from '@shared/components'
 import type { ThemedToken } from '@shikijs/core'
-import { MultiFileDiff, TokenDisplay } from '@shared/components'
+import { CustomCodeBlockHeader, CustomDiffFileHeader, MultiFileDiff, TokenDisplay } from '@shared/components'
 import { useHighlighter } from '@shared/hooks'
 import { rustExample } from '@shared/snippets'
 import { styles } from '@shared/styles'
@@ -85,6 +85,20 @@ export function ShikiExampleScreen() {
           : (
               <>
                 <TokenDisplay showLineNumbers title="snippet.rs" badge="rust" tokens={tokens} />
+                <Text style={[styles.sectionTitle, { marginTop: 20 }]}>
+                  Code block without header
+                </Text>
+                <TokenDisplay showLineNumbers tokens={tokens} showCodeHeader={false} />
+                <Text style={[styles.sectionTitle, { marginTop: 20 }]}>
+                  Code block with custom header
+                </Text>
+                <TokenDisplay
+                  showLineNumbers
+                  title="snippet.rs"
+                  badge="rust"
+                  tokens={tokens}
+                  codeHeaderComponent={CustomCodeBlockHeader}
+                />
                 {ready
                   ? (
                       <View style={{ marginHorizontal: 24, marginTop: 8 }}>
@@ -93,6 +107,24 @@ export function ShikiExampleScreen() {
                           files={demoDiffFiles}
                           theme="tokyo-night"
                           tokenize={highlighter.tokenize}
+                        />
+                        <Text style={[styles.sectionTitle, { marginTop: 20 }]}>
+                          Diff without built-in header
+                        </Text>
+                        <MultiFileDiff
+                          files={demoDiffFiles}
+                          theme="tokyo-night"
+                          tokenize={highlighter.tokenize}
+                          showFileHeader={false}
+                        />
+                        <Text style={[styles.sectionTitle, { marginTop: 20 }]}>
+                          Diff with custom header
+                        </Text>
+                        <MultiFileDiff
+                          files={demoDiffFiles}
+                          theme="tokyo-night"
+                          tokenize={highlighter.tokenize}
+                          fileHeaderComponent={CustomDiffFileHeader}
                         />
                       </View>
                     )
