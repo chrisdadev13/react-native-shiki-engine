@@ -17,6 +17,7 @@
     "react": "catalog:react",
     "react-native": "0.82.1",
     "react-native-safe-area-context": "catalog:react",
+    "react-native-shiki-diff-ui": "workspace:*",
     "react-native-shiki-engine": "workspace:*"
   },
   "devDependencies": {

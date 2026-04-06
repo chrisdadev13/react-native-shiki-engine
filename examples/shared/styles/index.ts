@@ -9,7 +9,7 @@ const monospaceFontFamily = Platform.select({
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#2e3440',
+    backgroundColor: '#1a1b26',
   },
   header: {
     marginTop: 20,
@@ -20,29 +20,31 @@ export const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: '700',
     marginBottom: 16,
-    color: '#ECEFF4',
+    color: '#c0caf5',
   },
   statusContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#3B4252',
+    backgroundColor: '#16161e',
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 8,
     alignSelf: 'flex-start',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#292e42',
   },
   statusLabel: {
     fontSize: 16,
-    color: '#D8DEE9',
+    color: '#a9b1d6',
     marginRight: 10,
   },
   statusValue: {
     fontSize: 16,
-    color: '#ECEFF4',
+    color: '#c0caf5',
     fontWeight: '600',
   },
   platformBadge: {
-    backgroundColor: '#5E81AC',
+    backgroundColor: '#7aa2f7',
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 6,
@@ -50,19 +52,24 @@ export const styles = StyleSheet.create({
   },
   platformText: {
     fontSize: 14,
-    color: '#ECEFF4',
+    color: '#1a1b26',
     fontWeight: '600',
   },
   demoSection: {
     flex: 1,
     paddingBottom: 20,
   },
-  codeContainer: {
-    padding: 16,
-    marginVertical: 16,
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#a9b1d6',
     marginHorizontal: 24,
-    borderRadius: 12,
-    backgroundColor: '#3B4252',
+    marginTop: 8,
+    marginBottom: 8,
+  },
+  codeContainer: {
+    marginVertical: 12,
+    marginHorizontal: 24,
     flexShrink: 1,
   },
   codeScrollContainer: {
@@ -83,27 +90,14 @@ export const styles = StyleSheet.create({
   },
   errorContainer: {
     padding: 16,
-    backgroundColor: '#bf616a22',
+    backgroundColor: 'rgba(247, 118, 142, 0.12)',
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#bf616a',
+    borderColor: '#f7768e',
     marginHorizontal: 16,
   },
   errorText: {
-    color: '#bf616a',
+    color: '#f7768e',
     fontSize: 16,
-  },
-  languageTag: {
-    position: 'absolute',
-    top: 8,
-    right: 12,
-    backgroundColor: '#4C566A',
-    color: '#ECEFF4',
-    fontSize: 12,
-    paddingVertical: 2,
-    paddingHorizontal: 8,
-    borderRadius: 6,
-    fontWeight: '600',
-    zIndex: 1,
   },
 })

@@ -1,5 +1,6 @@
+import type { FileDiffPair } from '@shared/components'
 import type { ThemedToken } from '@shikijs/core'
-import { TokenDisplay } from '@shared/components'
+import { MultiFileDiff, TokenDisplay } from '@shared/components'
 import { useHighlighter } from '@shared/hooks'
 import { rustExample } from '@shared/snippets'
 import { styles } from '@shared/styles'
@@ -7,10 +8,22 @@ import React, { useEffect, useState } from 'react'
 import { Platform, ScrollView, StatusBar, Text, View } from 'react-native'
 import { isNativeEngineAvailable } from 'react-native-shiki-engine'
 
+const demoDiffFiles: FileDiffPair[] = [
+  {
+    oldFile: { name: 'example.ts', contents: 'console.log("Hello world");\n' },
+    newFile: { name: 'example.ts', contents: 'console.warn("Updated message");\n' },
+  },
+  {
+    oldFile: { name: 'util.ts', contents: 'export const x = 1;\n' },
+    newFile: { name: 'util.ts', contents: 'export const x = 2;\nexport const y = 3;' },
+  },
+]
+
 export function ShikiExampleScreen() {
   const [engineStatus, setEngineStatus] = useState('Initializing...')
   const [tokens, setTokens] = useState<ThemedToken[][]>([])
   const [error, setError] = useState('')
+  const [ready, setReady] = useState(false)
   const highlighter = useHighlighter()
 
   const platformName = Platform.OS === 'web' ? 'Web' : Platform.OS === 'ios' ? 'iOS' : 'Android'
@@ -24,10 +37,11 @@ export function ShikiExampleScreen() {
         setEngineStatus(engineType)
 
         await highlighter.initialize()
+        setReady(true)
 
         const tokenized = highlighter.tokenize(rustExample, {
           lang: 'rust',
-          theme: 'dracula',
+          theme: 'tokyo-night',
         })
 
         setTokens(tokenized)
@@ -65,7 +79,6 @@ export function ShikiExampleScreen() {
       </View>
 
       <ScrollView style={styles.demoSection} showsVerticalScrollIndicator={false}>
-        <Text style={styles.languageTag}>rust</Text>
         {error
           ? (
               <View style={styles.errorContainer}>
@@ -73,7 +86,21 @@ export function ShikiExampleScreen() {
               </View>
             )
           : (
-              <TokenDisplay tokens={tokens} />
+              <>
+                <TokenDisplay showLineNumbers title="snippet.rs" badge="rust" tokens={tokens} />
+                {ready
+                  ? (
+                      <View style={{ marginHorizontal: 24, marginTop: 8 }}>
+                        <Text style={styles.sectionTitle}>Stacked file diffs</Text>
+                        <MultiFileDiff
+                          files={demoDiffFiles}
+                          theme="tokyo-night"
+                          tokenize={highlighter.tokenize}
+                        />
+                      </View>
+                    )
+                  : null}
+              </>
             )}
       </ScrollView>
     </View>

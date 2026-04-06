@@ -4,7 +4,9 @@ import { HighlighterContext } from '@shared/contexts'
 import { createHighlighterCore } from '@shikijs/core'
 import { createOnigurumaEngine } from '@shikijs/engine-oniguruma'
 import rust from '@shikijs/langs/rust'
-import dracula from '@shikijs/themes/dracula'
+import tsx from '@shikijs/langs/tsx'
+import typescript from '@shikijs/langs/typescript'
+import tokyoNight from '@shikijs/themes/tokyo-night'
 import React from 'react'
 
 let highlighterInstance: HighlighterCore | null = null
@@ -17,8 +19,8 @@ export function HighlighterProvider({ children }: { children: React.ReactNode })
         if (!initializationPromise) {
           initializationPromise = (async () => {
             highlighterInstance = await createHighlighterCore({
-              langs: [rust],
-              themes: [dracula],
+              langs: [rust, typescript, tsx],
+              themes: [tokyoNight],
               engine: createOnigurumaEngine(import('@shikijs/engine-oniguruma/wasm-inlined')),
             })
           })()
