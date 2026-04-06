@@ -1,0 +1,127 @@
+examples/react-native/src/contexts/highlighter/index.tsx
+  c3f70483865dfcc4 6-8,26-27
+packages/react-native-shiki-diff-ui/src/components/CodeBlockWithGutter.tsx
+  eaf13b83eaea4a6e 14-17,20-24,30-31,33-35,38-73,75-83,85,87-120,122
+  c3f70483865dfcc4 1,3-13,18-19,25-29,32,36-37,74,84,86,121,123-126
+packages/react-native-shiki-diff-ui/src/splitSourceLines.ts
+  c3f70483865dfcc4 1-7
+packages/react-native-shiki-diff-ui/src/components/MultiFileDiff.tsx
+  eaf13b83eaea4a6e 13,16-21,31-32,45-46,50
+  c3f70483865dfcc4 1,3-12,14-15,22-30,33-44,47-49,51-55
+examples/expo-app/src/contexts/highlighter/index.tsx
+  c3f70483865dfcc4 6-8,26-27
+packages/react-native-shiki-diff-ui/src/index.ts
+  c3f70483865dfcc4 1-10
+examples/expo-app/package.json
+  c3f70483865dfcc4 28
+packages/react-native-shiki-diff-ui/tsconfig.json
+  c3f70483865dfcc4 1-22
+packages/react-native-shiki-diff-ui/src/types.ts
+  c3f70483865dfcc4 1-20
+packages/react-native-shiki-diff-ui/src/components/TokenLine.tsx
+  c3f70483865dfcc4 1-30
+examples/shared/components/TokenDisplay.tsx
+  c3f70483865dfcc4 3,8,17-19,22-23
+  eaf13b83eaea4a6e 9-12,15,20-21
+packages/react-native-shiki-diff-ui/src/buildDiffDisplayItems.ts
+  eaf13b83eaea4a6e 1-83
+examples/react-native/package.json
+  c3f70483865dfcc4 20
+pnpm-workspace.yaml
+  c3f70483865dfcc4 13-14
+packages/react-native-shiki-diff-ui/src/buildLineDiffRows.ts
+  c3f70483865dfcc4 1,3-55
+packages/react-native-shiki-diff-ui/package.json
+  c3f70483865dfcc4 1-63
+packages/react-native-shiki-diff-ui/src/langFromFileName.ts
+  c3f70483865dfcc4 1-29
+examples/shared/components/index.ts
+  c3f70483865dfcc4 2-3
+examples/expo-app/src/components/ShikiExampleScreen.web.tsx
+  c3f70483865dfcc4 1,3,11-21,25,32,36,81,83-95
+  eaf13b83eaea4a6e 82
+examples/shared/styles/index.ts
+  eaf13b83eaea4a6e 71
+  c3f70483865dfcc4 12,23,28,33-34,38,43,47,55,62-69,93,96,100
+packages/react-native-shiki-diff-ui/src/diffLineChrome.ts
+  c3f70483865dfcc4 1-22,24,27-28,57-65
+  eaf13b83eaea4a6e 23,25-26,29-56
+examples/shared/package.json
+  c3f70483865dfcc4 13-14
+packages/react-native-shiki-diff-ui/src/components/FileDiffSection.tsx
+  758abde465f7184b 116-117,132-134,136-137,149-164,186-188,190-191,193-195,197-198
+  c3f70483865dfcc4 1-2,6,10-18,21-23,26-27,80-82,108-115,196,199-202
+  eaf13b83eaea4a6e 3-5,7-9,19-20,24-25,28-79,83-107,118-131,135,138-148,165-185,189,192
+packages/react-native-shiki-diff-ui/src/styles.ts
+  eaf13b83eaea4a6e 12,22,24,27,31-32,43,46-47,77,81-86,90-95,97,99-109,112-113,118-128,130-133,135,138-139,141,149-150,157-159,163-211,215,219-251,253,256-293
+  cd76f3b7791fad2d 98,110
+  c3f70483865dfcc4 1-11,13-21,23,30,33-42,44-45,48-57,64-66,73-76,78-80,87-89,96,111,114-117,129,134,136-137,140,142-148,151-156,160-162,212-214,216-218,252,254-255,294-295
+  758abde465f7184b 25-26,28-29,58-63,67-72
+examples/react-native/src/components/ShikiExampleScreen.tsx
+  c3f70483865dfcc4 1,3,12-22,27,40,44,86,88-100
+  eaf13b83eaea4a6e 87
+examples/expo-app/src/contexts/highlighter/index.web.tsx
+  c3f70483865dfcc4 7-9,22-23
+examples/expo-app/src/components/ShikiExampleScreen.tsx
+  c3f70483865dfcc4 1,3,11-21,26,40,44,89,91-103
+  eaf13b83eaea4a6e 90
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.5",
+  "base_commit_sha": "0f3174a3a3fa73f079dd94df8ec1a27099d8b60a",
+  "prompts": {
+    "758abde465f7184b": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "d95c65df-237f-4dab-9d43-b48c6b4d5888",
+        "model": "composer-2"
+      },
+      "human_author": "Chris",
+      "messages": [],
+      "total_additions": 63,
+      "total_deletions": 39,
+      "accepted_lines": 49,
+      "overriden_lines": 0
+    },
+    "c3f70483865dfcc4": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "d0fc419c-0e3e-42eb-8365-d7bdd6042ce5",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Chris",
+      "messages": [],
+      "total_additions": 1038,
+      "total_deletions": 282,
+      "accepted_lines": 611,
+      "overriden_lines": 0
+    },
+    "cd76f3b7791fad2d": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "c571ab7f-b883-4f5d-b52c-82f6542a4fd9",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Chris",
+      "messages": [],
+      "total_additions": 9,
+      "total_deletions": 7,
+      "accepted_lines": 2,
+      "overriden_lines": 0
+    },
+    "eaf13b83eaea4a6e": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "8fcf8aab-d23f-4a12-bc06-84c418ae059f",
+        "model": "composer-2"
+      },
+      "human_author": "Chris",
+      "messages": [],
+      "total_additions": 669,
+      "total_deletions": 248,
+      "accepted_lines": 550,
+      "overriden_lines": 0
+    }
+  }
+}
