@@ -1,4 +1,4 @@
-# React Native Shiki Engine
+# RN Shiki Engine
 
 Oniguruma regex engine implementation for React Native, providing high-performance syntax highlighting capabilities through [Shiki](https://github.com/shikijs/shiki). This module implements a JSI-based native bridge to Oniguruma, enabling efficient pattern matching and syntax highlighting in React Native applications.
 
