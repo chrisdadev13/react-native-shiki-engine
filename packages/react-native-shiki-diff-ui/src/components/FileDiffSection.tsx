@@ -27,6 +27,41 @@ export interface FileDiffSectionProps {
 
 const DEFAULT_CONTEXT_COLLAPSE = 6
 
+type CollapseBarPlacement = 'top' | 'middle' | 'bottom'
+
+function collapseBarPlacement(
+  displayItemsLength: number,
+  itemIndex: number,
+): CollapseBarPlacement {
+  const isFirst = itemIndex === 0
+  const isLast = itemIndex === displayItemsLength - 1
+  if (isFirst && isLast)
+    return 'middle'
+  if (isFirst)
+    return 'top'
+  if (isLast)
+    return 'bottom'
+  return 'middle'
+}
+
+function CollapsedBarChevrons({ placement }: { placement: CollapseBarPlacement }) {
+  const { collapsedRailChevron, collapsedRailChevronStack } = diffUiStyles
+  if (placement === 'middle') {
+    return (
+      <View style={collapsedRailChevronStack}>
+        <Text style={collapsedRailChevron}>▼</Text>
+        <Text style={collapsedRailChevron}>▲</Text>
+      </View>
+    )
+  }
+  return (
+    <View style={collapsedRailChevronStack}>
+      <Text style={collapsedRailChevron}>↕</Text>
+      <Text style={collapsedRailChevron}>▼</Text>
+    </View>
+  )
+}
+
 function renderAccentStripe(kind: DiffRow['kind']) {
   const color = accentStripeColorForKind(kind)
   const dashed = Platform.OS === 'ios'
@@ -115,17 +150,31 @@ export function FileDiffSection({
       >
         <View style={diffUiStyles.diffBodyRow}>
           <View style={diffUiStyles.diffLeftRail}>
-            {displayItems.map((item) => {
+            {displayItems.map((item, itemIndex) => {
               if (item.type === 'collapsed') {
+                const placement = collapseBarPlacement(displayItems.length, itemIndex)
                 return (
                   <Pressable
                     key={`${newFileName}-collapse-rail-${item.baseIndex}`}
                     onPress={() => toggleCollapse(item.baseIndex)}
                     style={({ pressed }) => [
-                      diffUiStyles.collapsedContextRail,
+                      diffUiStyles.diffRowChrome,
+                      diffUiStyles.collapsedContextRowChrome,
                       pressed ? { opacity: 0.88 } : null,
                     ]}
-                  />
+                  >
+                    {renderAccentStripe('context')}
+                    <View
+                      style={[
+                        diffUiStyles.gutterDiffSingle,
+                        diffUiStyles.gutterDiffNumberSeparator,
+                        diffUiStyles.collapsedContextGutter,
+                      ]}
+                    >
+                      <CollapsedBarChevrons placement={placement} />
+                    </View>
+                    <View style={diffUiStyles.signCell} />
+                  </Pressable>
                 )
               }
               const { row } = item
@@ -173,7 +222,6 @@ export function FileDiffSection({
                         pressed ? { opacity: 0.88 } : null,
                       ]}
                     >
-                      <Text style={diffUiStyles.collapsedContextChevron}>▼</Text>
                       <Text style={diffUiStyles.collapsedContextLabel}>
                         {item.count}
                         {' '}

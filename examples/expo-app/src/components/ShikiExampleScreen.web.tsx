@@ -7,6 +7,7 @@ import { styles } from '@shared/styles'
 import React, { useEffect, useState } from 'react'
 import { ScrollView, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { taskSummaryDiffDemoFiles } from '@/snippets/taskSummaryDiffDemo'
 
 const demoDiffFiles: FileDiffPair[] = [
   {
@@ -88,6 +89,15 @@ export function ShikiExampleScreen() {
                           files={demoDiffFiles}
                           theme="tokyo-night"
                           tokenize={highlighter.tokenize}
+                        />
+                        <Text style={[styles.sectionTitle, { marginTop: 20 }]}>
+                          Large file (collapsed unmodified sections)
+                        </Text>
+                        <MultiFileDiff
+                          files={taskSummaryDiffDemoFiles}
+                          theme="tokyo-night"
+                          tokenize={highlighter.tokenize}
+                          contextCollapseThreshold={6}
                         />
                       </View>
                     )

@@ -7,6 +7,7 @@ import { styles } from '@shared/styles'
 import React, { useEffect, useState } from 'react'
 import { Platform, ScrollView, StatusBar, Text, View } from 'react-native'
 import { isNativeEngineAvailable } from 'react-native-shiki-engine'
+import { taskSummaryDiffDemoFiles } from '@/snippets/taskSummaryDiffDemo'
 
 const demoDiffFiles: FileDiffPair[] = [
   {
@@ -96,6 +97,15 @@ export function ShikiExampleScreen() {
                           files={demoDiffFiles}
                           theme="tokyo-night"
                           tokenize={highlighter.tokenize}
+                        />
+                        <Text style={[styles.sectionTitle, { marginTop: 20 }]}>
+                          Large file (collapsed unmodified sections)
+                        </Text>
+                        <MultiFileDiff
+                          files={taskSummaryDiffDemoFiles}
+                          theme="tokyo-night"
+                          tokenize={highlighter.tokenize}
+                          contextCollapseThreshold={6}
                         />
                       </View>
                     )
