@@ -1,6 +1,6 @@
 import type { ThemedToken } from '@shikijs/core'
 import type { ViewStyle } from 'react-native'
-import React, { useMemo, type ComponentType, type ReactNode } from 'react'
+import React, { memo, useMemo, type ComponentType, type ReactNode } from 'react'
 import { ScrollView, Text, View } from 'react-native'
 import { diffUiStyles } from '../styles'
 import { TokenLine } from './TokenLine'
@@ -65,7 +65,7 @@ function DefaultCodeBlockHeader({ title, badge }: CodeBlockHeaderRenderProps) {
   )
 }
 
-export function CodeBlockWithGutter({
+function CodeBlockWithGutterInner({
   tokens,
   showLineNumbers = false,
   startLine = 1,
@@ -118,7 +118,7 @@ export function CodeBlockWithGutter({
                 <View>
                   {tokens.map((line, lineIndex) => (
                     <View
-                      key={`plain-${lineIndex}-${line.map(t => t.content).join('').length}`}
+                      key={`plain-${lineIndex}`}
                       style={diffUiStyles.codeLine}
                     >
                       <TokenLine line={line} lineKeyPrefix={`plain-${lineIndex}`} />
@@ -130,11 +130,11 @@ export function CodeBlockWithGutter({
           : (
               <View style={diffUiStyles.diffBodyRow}>
                 <View style={diffUiStyles.lineNumberRail}>
-                  {tokens.map((line, lineIndex) => {
+                  {tokens.map((_, lineIndex) => {
                     const displayNo = startLine + lineIndex
                     return (
                       <View
-                        key={`ln-g-${lineIndex}-${line.map(t => t.content).join('').length}`}
+                        key={`ln-g-${lineIndex}`}
                         style={diffUiStyles.codeLine}
                       >
                         <View style={diffUiStyles.gutterDiffSingle}>
@@ -153,7 +153,7 @@ export function CodeBlockWithGutter({
                   <View style={diffUiStyles.diffCodeColumn}>
                     {tokens.map((line, lineIndex) => (
                       <View
-                        key={`ln-c-${lineIndex}-${line.map(t => t.content).join('').length}`}
+                        key={`ln-c-${lineIndex}`}
                         style={diffUiStyles.codeLine}
                       >
                         <TokenLine line={line} lineKeyPrefix={`ln-${lineIndex}`} />
@@ -167,3 +167,6 @@ export function CodeBlockWithGutter({
     </View>
   )
 }
+
+export const CodeBlockWithGutter = memo(CodeBlockWithGutterInner)
+CodeBlockWithGutter.displayName = 'CodeBlockWithGutter'

@@ -38,7 +38,6 @@ export function ShikiExampleScreen() {
         setEngineStatus(engineType)
 
         await highlighter.initialize()
-        setReady(true)
 
         const tokenized = highlighter.tokenize(rustExample, {
           lang: 'rust',
@@ -46,6 +45,7 @@ export function ShikiExampleScreen() {
         })
 
         setTokens(tokenized)
+        setReady(true)
       }
       catch (err: unknown) {
         if (err instanceof Error) {
@@ -87,24 +87,24 @@ export function ShikiExampleScreen() {
               </View>
             )
           : (
-              <>
-                <TokenDisplay showLineNumbers title="snippet.rs" badge="rust" tokens={tokens} />
-                <Text style={[styles.sectionTitle, { marginTop: 20 }]}>
-                  Code block without header
-                </Text>
-                <TokenDisplay showLineNumbers tokens={tokens} showCodeHeader={false} />
-                <Text style={[styles.sectionTitle, { marginTop: 20 }]}>
-                  Code block with custom header
-                </Text>
-                <TokenDisplay
-                  showLineNumbers
-                  title="snippet.rs"
-                  badge="rust"
-                  tokens={tokens}
-                  codeHeaderComponent={CustomCodeBlockHeader}
-                />
-                {ready
-                  ? (
+              ready
+                ? (
+                    <>
+                      <TokenDisplay showLineNumbers title="snippet.rs" badge="rust" tokens={tokens} />
+                      <Text style={[styles.sectionTitle, { marginTop: 20 }]}>
+                        Code block without header
+                      </Text>
+                      <TokenDisplay showLineNumbers tokens={tokens} showCodeHeader={false} />
+                      <Text style={[styles.sectionTitle, { marginTop: 20 }]}>
+                        Code block with custom header
+                      </Text>
+                      <TokenDisplay
+                        showLineNumbers
+                        title="snippet.rs"
+                        badge="rust"
+                        tokens={tokens}
+                        codeHeaderComponent={CustomCodeBlockHeader}
+                      />
                       <View style={{ marginHorizontal: 24, marginTop: 8 }}>
                         <Text style={styles.sectionTitle}>Stacked file diffs</Text>
                         <MultiFileDiff
@@ -140,9 +140,13 @@ export function ShikiExampleScreen() {
                           contextCollapseThreshold={6}
                         />
                       </View>
-                    )
-                  : null}
-              </>
+                    </>
+                  )
+                : (
+                    <View style={{ paddingHorizontal: 24, paddingVertical: 16 }}>
+                      <Text style={styles.sectionTitle}>Loading highlighter…</Text>
+                    </View>
+                  )
             )}
       </ScrollView>
     </View>

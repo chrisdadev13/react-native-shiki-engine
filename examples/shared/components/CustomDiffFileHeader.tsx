@@ -12,21 +12,34 @@ const customHeaderStyles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#565f89',
   },
+  rootCollapsedSolo: {
+    borderBottomLeftRadius: 12,
+    borderBottomRightRadius: 12,
+  },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    gap: 8,
   },
   path: {
     flex: 1,
+    minWidth: 0,
     fontSize: 13,
     fontWeight: '600',
     color: '#bb9af7',
-    marginRight: 12,
+    textAlign: 'left',
+  },
+  chevron: {
+    fontSize: 10,
+    color: '#565f89',
+    width: 14,
+    textAlign: 'center',
+    marginRight: 8,
   },
   stats: {
     flexDirection: 'row',
     alignItems: 'center',
+    flexShrink: 0,
   },
   remove: {
     fontSize: 12,
@@ -47,11 +60,25 @@ export function CustomDiffFileHeader({
   newFileName,
   fileRenamed,
   stats,
+  collapsed,
+  collapsible,
 }: FileDiffHeaderRenderProps) {
   const pathLabel = fileRenamed ? `${oldFileName} → ${newFileName}` : newFileName
   return (
-    <View style={customHeaderStyles.root}>
+    <View
+      style={[
+        customHeaderStyles.root,
+        collapsible && collapsed ? customHeaderStyles.rootCollapsedSolo : null,
+      ]}
+    >
       <View style={customHeaderStyles.row}>
+        {collapsible
+          ? (
+              <Text style={customHeaderStyles.chevron} accessibilityElementsHidden>
+                {collapsed ? '▶' : '▼'}
+              </Text>
+            )
+          : null}
         <Text style={customHeaderStyles.path} numberOfLines={1}>
           {pathLabel}
         </Text>

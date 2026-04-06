@@ -1,10 +1,23 @@
 import type { ThemedToken } from '@shikijs/core'
-import type { FileDiffPair } from '../types'
-import React, { Fragment, useMemo, type ComponentType, type ReactNode } from 'react'
+import type { DiffRow, FileDiffPair } from '../types'
+import React, { Fragment, memo, useMemo, type ComponentType, type ReactNode } from 'react'
 import { buildLineDiffRows } from '../buildLineDiffRows'
 import { langFromFileName } from '../langFromFileName'
 import type { FileDiffHeaderRenderProps } from './FileDiffSection'
 import { FileDiffSection } from './FileDiffSection'
+
+type PreparedSection = {
+  key: string
+  oldName: string
+  newName: string
+  rows: DiffRow[]
+  lang: string
+  oldContents: string
+  newContents: string
+  collapsed: boolean | undefined
+  onCollapsedChange: ((collapsed: boolean) => void) | undefined
+  collapsible: boolean | undefined
+}
 
 export interface MultiFileDiffProps {
   files: FileDiffPair[]
@@ -17,7 +30,7 @@ export interface MultiFileDiffProps {
   fileHeaderComponent?: ComponentType<FileDiffHeaderRenderProps>
 }
 
-export function MultiFileDiff({
+function MultiFileDiffInner({
   files,
   tokenize,
   theme,
@@ -27,22 +40,37 @@ export function MultiFileDiff({
   renderFileHeader,
   fileHeaderComponent,
 }: MultiFileDiffProps) {
-  const sections = useMemo(() => {
+  const prepared = useMemo((): PreparedSection[] => {
     return files.map((pair) => {
       const lang = pair.lang ?? langFromFileName(pair.newFile.name, defaultLang)
-      const oldTokens = tokenize(pair.oldFile.contents, { lang, theme })
-      const newTokens = tokenize(pair.newFile.contents, { lang, theme })
-      const rows = buildLineDiffRows(pair.oldFile.contents, pair.newFile.contents)
       return {
         key: `${pair.oldFile.name}\0${pair.newFile.name}`,
         oldName: pair.oldFile.name,
         newName: pair.newFile.name,
-        rows,
-        oldTokens,
-        newTokens,
+        rows: buildLineDiffRows(pair.oldFile.contents, pair.newFile.contents),
+        lang,
+        oldContents: pair.oldFile.contents,
+        newContents: pair.newFile.contents,
+        collapsed: pair.collapsed,
+        onCollapsedChange: pair.onCollapsedChange,
+        collapsible: pair.collapsible,
       }
     })
-  }, [files, tokenize, theme, defaultLang])
+  }, [files, defaultLang])
+
+  const sections = useMemo(() => {
+    return prepared.map(p => ({
+      key: p.key,
+      oldName: p.oldName,
+      newName: p.newName,
+      rows: p.rows,
+      oldTokens: tokenize(p.oldContents, { lang: p.lang, theme }),
+      newTokens: tokenize(p.newContents, { lang: p.lang, theme }),
+      collapsed: p.collapsed,
+      onCollapsedChange: p.onCollapsedChange,
+      collapsible: p.collapsible,
+    }))
+  }, [prepared, tokenize, theme])
 
   return (
     <Fragment>
@@ -58,8 +86,14 @@ export function MultiFileDiff({
           showFileHeader={showFileHeader}
           renderFileHeader={renderFileHeader}
           fileHeaderComponent={fileHeaderComponent}
+          collapsed={section.collapsed}
+          onCollapsedChange={section.onCollapsedChange}
+          collapsible={section.collapsible}
         />
       ))}
     </Fragment>
   )
 }
+
+export const MultiFileDiff = memo(MultiFileDiffInner)
+MultiFileDiff.displayName = 'MultiFileDiff'

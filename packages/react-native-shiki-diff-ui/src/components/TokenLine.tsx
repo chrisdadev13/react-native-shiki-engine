@@ -1,5 +1,5 @@
 import type { ThemedToken } from '@shikijs/core'
-import React from 'react'
+import React, { memo } from 'react'
 import { Text, View } from 'react-native'
 import { diffUiStyles } from '../styles'
 
@@ -8,7 +8,7 @@ interface TokenLineProps {
   lineKeyPrefix: string
 }
 
-export function TokenLine({ line, lineKeyPrefix }: TokenLineProps) {
+function TokenLineInner({ line, lineKeyPrefix }: TokenLineProps) {
   return (
     <View style={diffUiStyles.codeScrollInner}>
       {line.map((token, tokenIndex) => (
@@ -28,3 +28,6 @@ export function TokenLine({ line, lineKeyPrefix }: TokenLineProps) {
     </View>
   )
 }
+
+export const TokenLine = memo(TokenLineInner)
+TokenLine.displayName = 'TokenLine'

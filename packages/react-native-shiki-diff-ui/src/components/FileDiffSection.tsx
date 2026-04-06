@@ -1,7 +1,7 @@
 import type { ThemedToken } from '@shikijs/core'
 import type { DiffRow } from '../types'
-import React, { useMemo, useState, type ComponentType, type ReactNode } from 'react'
-import { Platform, Pressable, ScrollView, Text, View } from 'react-native'
+import React, { memo, useCallback, useMemo, useState, type ComponentType, type ReactNode } from 'react'
+import { Pressable, ScrollView, Text, View } from 'react-native'
 import { buildDiffDisplayItems, collapseKeyForBaseIndex } from '../buildDiffDisplayItems'
 import {
   accentStripeColorForKind,
@@ -20,6 +20,10 @@ export interface FileDiffHeaderRenderProps {
   newFileName: string
   fileRenamed: boolean
   stats: { add: number, remove: number }
+  /** Whether the diff body below the header is hidden. */
+  collapsed: boolean
+  /** When false, the header is not a toggle and chevrons are omitted. */
+  collapsible: boolean
 }
 
 export interface FileDiffSectionProps {
@@ -40,6 +44,14 @@ export interface FileDiffSectionProps {
   renderFileHeader?: (props: FileDiffHeaderRenderProps) => ReactNode
   /** Custom header component. Used when `renderFileHeader` is omitted. */
   fileHeaderComponent?: ComponentType<FileDiffHeaderRenderProps>
+  /**
+   * When `onCollapsedChange` is set, this is controlled. Otherwise internal state is used
+   * (initial value from this prop on first mount).
+   */
+  collapsed?: boolean
+  onCollapsedChange?: (collapsed: boolean) => void
+  /** When false, the diff body is always shown and the header does not toggle. Default true. */
+  collapsible?: boolean
 }
 
 const DEFAULT_CONTEXT_COLLAPSE = 6
@@ -61,7 +73,7 @@ function collapseBarPlacement(
   return 'middle'
 }
 
-function CollapsedBarChevrons({ placement }: { placement: CollapseBarPlacement }) {
+const CollapsedBarChevrons = memo(function CollapsedBarChevrons({ placement }: { placement: CollapseBarPlacement }) {
   const { collapsedRailChevron, collapsedRailChevronStack } = diffUiStyles
   if (placement === 'middle') {
     return (
@@ -77,17 +89,26 @@ function CollapsedBarChevrons({ placement }: { placement: CollapseBarPlacement }
       <Text style={collapsedRailChevron}>▼</Text>
     </View>
   )
-}
+})
 
-function DefaultFileDiffHeader({
+const DefaultFileDiffHeader = memo(function DefaultFileDiffHeader({
   oldFileName,
   newFileName,
   fileRenamed,
   stats,
+  collapsed,
+  collapsible,
 }: FileDiffHeaderRenderProps) {
   return (
     <View style={diffUiStyles.fileHeader}>
       <View style={diffUiStyles.fileHeaderRow}>
+        {collapsible
+          ? (
+              <Text style={diffUiStyles.fileHeaderChevron} accessibilityElementsHidden>
+                {collapsed ? '▶' : '▼'}
+              </Text>
+            )
+          : null}
         <View style={diffUiStyles.breadcrumbRow}>
           {fileRenamed
             ? (
@@ -114,11 +135,10 @@ function DefaultFileDiffHeader({
       </View>
     </View>
   )
-}
+})
 
 function renderAccentStripe(kind: DiffRow['kind']) {
   const color = accentStripeColorForKind(kind)
-  const dashed = Platform.OS === 'ios'
   if (color) {
     return (
       <View
@@ -127,7 +147,6 @@ function renderAccentStripe(kind: DiffRow['kind']) {
           {
             borderLeftWidth: 2,
             borderLeftColor: color,
-            borderStyle: dashed ? 'dashed' : 'solid',
           },
         ]}
       />
@@ -140,7 +159,7 @@ function isRenderableHeader(node: ReactNode): boolean {
   return node !== null && node !== undefined && node !== false
 }
 
-export function FileDiffSection({
+function FileDiffSectionInner({
   oldFileName,
   newFileName,
   rows,
@@ -150,20 +169,66 @@ export function FileDiffSection({
   showFileHeader = true,
   renderFileHeader,
   fileHeaderComponent: FileHeaderComponent,
+  collapsed: collapsedProp,
+  onCollapsedChange,
+  collapsible = true,
 }: FileDiffSectionProps) {
+  const isCollapsedControlled = onCollapsedChange !== undefined
+  const [internalCollapsed, setInternalCollapsed] = useState(() => collapsedProp ?? false)
+  const rawCollapsed = isCollapsedControlled ? Boolean(collapsedProp) : internalCollapsed
+  const sectionCollapsed = collapsible && rawCollapsed
+
+  const setSectionCollapsed = useCallback(
+    (next: boolean) => {
+      if (!collapsible)
+        return
+      if (isCollapsedControlled)
+        onCollapsedChange(next)
+      else
+        setInternalCollapsed(next)
+    },
+    [collapsible, isCollapsedControlled, onCollapsedChange],
+  )
+
+  const toggleSectionCollapsed = useCallback(() => {
+    if (!collapsible)
+      return
+    setSectionCollapsed(!rawCollapsed)
+  }, [collapsible, rawCollapsed, setSectionCollapsed])
+
   const [expandedCollapses, setExpandedCollapses] = useState(() => new Set<string>())
 
-  const displayItems = useMemo(
-    () => buildDiffDisplayItems(rows, contextCollapseThreshold, expandedCollapses),
-    [rows, contextCollapseThreshold, expandedCollapses],
-  )
+  const displayItems = useMemo(() => {
+    if (sectionCollapsed)
+      return []
+    return buildDiffDisplayItems(rows, contextCollapseThreshold, expandedCollapses)
+  }, [sectionCollapsed, rows, contextCollapseThreshold, expandedCollapses])
+
+  const toggleCollapse = useCallback((baseIndex: number) => {
+    const key = collapseKeyForBaseIndex(baseIndex)
+    setExpandedCollapses((prev) => {
+      const next = new Set(prev)
+      if (next.has(key))
+        next.delete(key)
+      else
+        next.add(key)
+      return next
+    })
+  }, [])
 
   const stats = useMemo(() => countDiffStats(rows), [rows])
   const fileRenamed = oldFileName !== newFileName
 
   const headerRenderProps: FileDiffHeaderRenderProps = useMemo(
-    () => ({ oldFileName, newFileName, fileRenamed, stats }),
-    [oldFileName, newFileName, fileRenamed, stats],
+    () => ({
+      oldFileName,
+      newFileName,
+      fileRenamed,
+      stats,
+      collapsed: sectionCollapsed,
+      collapsible,
+    }),
+    [oldFileName, newFileName, fileRenamed, stats, sectionCollapsed, collapsible],
   )
 
   const headerNode: ReactNode = useMemo(() => {
@@ -178,128 +243,145 @@ export function FileDiffSection({
 
   const hasHeader = isRenderableHeader(headerNode)
 
-  const toggleCollapse = (baseIndex: number) => {
-    const key = collapseKeyForBaseIndex(baseIndex)
-    setExpandedCollapses((prev) => {
-      const next = new Set(prev)
-      if (next.has(key))
-        next.delete(key)
-      else
-        next.add(key)
-      return next
-    })
-  }
-
   return (
     <View style={diffUiStyles.fileSection}>
-      {hasHeader ? headerNode : null}
-      <View
-        style={[
-          diffUiStyles.panel,
-          diffUiStyles.diffPanelBody,
-          diffUiStyles.diffPanelBodyPadding,
-          !hasHeader
-            ? { borderTopLeftRadius: 12, borderTopRightRadius: 12 }
-            : null,
-        ]}
-      >
-        <View style={diffUiStyles.diffBodyRow}>
-          <View style={diffUiStyles.diffLeftRail}>
-            {displayItems.map((item, itemIndex) => {
-              if (item.type === 'collapsed') {
-                const placement = collapseBarPlacement(displayItems.length, itemIndex)
-                return (
+      {hasHeader
+        ? (
+            collapsible
+              ? (
                   <Pressable
-                    key={`${newFileName}-collapse-rail-${item.baseIndex}`}
-                    onPress={() => toggleCollapse(item.baseIndex)}
+                    onPress={toggleSectionCollapsed}
+                    accessibilityRole="button"
+                    accessibilityState={{ expanded: !sectionCollapsed }}
                     style={({ pressed }) => [
-                      diffUiStyles.diffRowChrome,
-                      diffUiStyles.collapsedContextRowChrome,
-                      pressed ? { opacity: 0.88 } : null,
+                      sectionCollapsed ? diffUiStyles.fileHeaderCollapsedClip : null,
+                      pressed ? { opacity: 0.92 } : null,
                     ]}
                   >
-                    {renderAccentStripe('context')}
-                    <View
-                      style={[
-                        diffUiStyles.gutterDiffSingle,
-                        diffUiStyles.gutterDiffNumberSeparator,
-                        diffUiStyles.collapsedContextGutter,
-                      ]}
-                    >
-                      <CollapsedBarChevrons placement={placement} />
-                    </View>
-                    <View style={diffUiStyles.signCell} />
+                    {headerNode}
                   </Pressable>
                 )
-              }
-              const { row } = item
-              const lineLabel = row.newLineNo !== null ? String(row.newLineNo) : String(row.oldLineNo ?? '')
-              return (
-                <View
-                  key={`${newFileName}-chrome-${item.rowIndex}-${row.kind}`}
-                  style={[diffUiStyles.diffRowChrome, rowBackgroundStyleForKind(row.kind)]}
-                >
-                  {renderAccentStripe(row.kind)}
-                  <View style={[diffUiStyles.gutterDiffSingle, diffUiStyles.gutterDiffNumberSeparator]}>
-                    <Text
-                      style={[
-                        diffUiStyles.gutterLineNumberDiff,
-                        { color: lineNumberColorForKind(row.kind) },
-                      ]}
-                    >
-                      {lineLabel}
-                    </Text>
-                  </View>
-                  <View style={diffUiStyles.signCell}>
-                    <Text style={[diffUiStyles.signText, { color: signColorForKind(row.kind) }]}>
-                      {signForKind(row.kind)}
-                    </Text>
-                  </View>
-                </View>
-              )
-            })}
-          </View>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator
-            style={diffUiStyles.diffCodeScroll}
-            contentContainerStyle={diffUiStyles.diffFileCodeScrollContent}
-          >
-            <View style={diffUiStyles.diffFileCodeColumn}>
-              {displayItems.map((item) => {
-                if (item.type === 'collapsed') {
-                  return (
-                    <Pressable
-                      key={`${newFileName}-collapse-code-${item.baseIndex}`}
-                      onPress={() => toggleCollapse(item.baseIndex)}
-                      style={({ pressed }) => [
-                        diffUiStyles.collapsedContextCodeFill,
-                        pressed ? { opacity: 0.88 } : null,
-                      ]}
-                    >
-                      <Text style={diffUiStyles.collapsedContextLabel}>
-                        {item.count}
-                        {' '}
-                        unmodified lines
-                      </Text>
-                    </Pressable>
-                  )
-                }
-                const { row } = item
-                const lineTokens = lineTokensForRow(row, oldTokens, newTokens)
-                return (
-                  <View
-                    key={`${newFileName}-code-${item.rowIndex}-${row.kind}`}
-                    style={[diffUiStyles.codeLine, rowBackgroundStyleForKind(row.kind)]}
-                  >
-                    <TokenLine line={lineTokens} lineKeyPrefix={`d-${item.rowIndex}`} />
+              : (
+                  <View>
+                    {headerNode}
                   </View>
                 )
-              })}
+          )
+        : null}
+      {sectionCollapsed
+        ? null
+        : (
+            <View
+              style={[
+                diffUiStyles.panel,
+                diffUiStyles.diffPanelBody,
+                diffUiStyles.diffPanelBodyPadding,
+                !hasHeader
+                  ? { borderTopLeftRadius: 12, borderTopRightRadius: 12 }
+                  : null,
+              ]}
+            >
+              <View style={diffUiStyles.diffBodyRow}>
+                <View style={diffUiStyles.diffLeftRail}>
+                  {displayItems.map((item, itemIndex) => {
+                    if (item.type === 'collapsed') {
+                      const placement = collapseBarPlacement(displayItems.length, itemIndex)
+                      return (
+                        <Pressable
+                          key={`${newFileName}-collapse-rail-${item.baseIndex}`}
+                          onPress={() => toggleCollapse(item.baseIndex)}
+                          style={({ pressed }) => [
+                            diffUiStyles.diffRowChrome,
+                            diffUiStyles.collapsedContextRowChrome,
+                            pressed ? { opacity: 0.88 } : null,
+                          ]}
+                        >
+                          {renderAccentStripe('context')}
+                          <View
+                            style={[
+                              diffUiStyles.gutterDiffSingle,
+                              diffUiStyles.gutterDiffNumberSeparator,
+                              diffUiStyles.collapsedContextGutter,
+                            ]}
+                          >
+                            <CollapsedBarChevrons placement={placement} />
+                          </View>
+                          <View style={diffUiStyles.signCell} />
+                        </Pressable>
+                      )
+                    }
+                    const { row } = item
+                    const lineLabel = row.newLineNo !== null ? String(row.newLineNo) : String(row.oldLineNo ?? '')
+                    return (
+                      <View
+                        key={`${newFileName}-chrome-${item.rowIndex}-${row.kind}`}
+                        style={[diffUiStyles.diffRowChrome, rowBackgroundStyleForKind(row.kind)]}
+                      >
+                        {renderAccentStripe(row.kind)}
+                        <View style={[diffUiStyles.gutterDiffSingle, diffUiStyles.gutterDiffNumberSeparator]}>
+                          <Text
+                            style={[
+                              diffUiStyles.gutterLineNumberDiff,
+                              { color: lineNumberColorForKind(row.kind) },
+                            ]}
+                          >
+                            {lineLabel}
+                          </Text>
+                        </View>
+                        <View style={diffUiStyles.signCell}>
+                          <Text style={[diffUiStyles.signText, { color: signColorForKind(row.kind) }]}>
+                            {signForKind(row.kind)}
+                          </Text>
+                        </View>
+                      </View>
+                    )
+                  })}
+                </View>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator
+                  style={diffUiStyles.diffCodeScroll}
+                  contentContainerStyle={diffUiStyles.diffFileCodeScrollContent}
+                >
+                  <View style={diffUiStyles.diffFileCodeColumn}>
+                    {displayItems.map((item) => {
+                      if (item.type === 'collapsed') {
+                        return (
+                          <Pressable
+                            key={`${newFileName}-collapse-code-${item.baseIndex}`}
+                            onPress={() => toggleCollapse(item.baseIndex)}
+                            style={({ pressed }) => [
+                              diffUiStyles.collapsedContextCodeFill,
+                              pressed ? { opacity: 0.88 } : null,
+                            ]}
+                          >
+                            <Text style={diffUiStyles.collapsedContextLabel}>
+                              {item.count}
+                              {' '}
+                              unmodified lines
+                            </Text>
+                          </Pressable>
+                        )
+                      }
+                      const { row } = item
+                      const lineTokens = lineTokensForRow(row, oldTokens, newTokens)
+                      return (
+                        <View
+                          key={`${newFileName}-code-${item.rowIndex}-${row.kind}`}
+                          style={[diffUiStyles.codeLine, rowBackgroundStyleForKind(row.kind)]}
+                        >
+                          <TokenLine line={lineTokens} lineKeyPrefix={`d-${item.rowIndex}`} />
+                        </View>
+                      )
+                    })}
+                  </View>
+                </ScrollView>
+              </View>
             </View>
-          </ScrollView>
-        </View>
-      </View>
+          )}
     </View>
   )
 }
+
+export const FileDiffSection = memo(FileDiffSectionInner)
+FileDiffSection.displayName = 'FileDiffSection'

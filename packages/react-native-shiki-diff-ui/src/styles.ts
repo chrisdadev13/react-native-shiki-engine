@@ -162,17 +162,31 @@ export const diffUiStyles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: "#2a2a36",
   },
+  /** Clips the header (single surface) when the diff body is hidden so bottom corners match the top. */
+  fileHeaderCollapsedClip: {
+    borderRadius: 12,
+    overflow: "hidden",
+  },
   fileHeaderRow: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
     gap: 12,
+  },
+  fileHeaderChevron: {
+    fontSize: 10,
+    color: "#565f89",
+    fontFamily: monospaceFamily,
+    width: 14,
+    textAlign: "center",
   },
   breadcrumbRow: {
     flexDirection: "row",
     alignItems: "center",
+    flex: 1,
+    minWidth: 0,
     flexShrink: 1,
     flexWrap: "wrap",
+    justifyContent: "flex-start",
   },
   breadcrumbName: {
     color: "#7aa2f7",
